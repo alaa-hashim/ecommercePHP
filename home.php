@@ -1,30 +1,34 @@
 <?php
 include "connect.php" ;
+$st=$_REQUEST['st'];
 
-$alldata = array();
-$alldata['status'] = "success" ; 
-//silders data
- $slider = getAllData("silder" , " hide = 0 " , null ,false , "  LIMIT  12 " );
- $alldata['silder'] = $slider;
- //category data
+$response = array();
+if($st==1){
+$response['success'] = true ; 
  $categories = getAllData("categories" , " hide = 0 " , null ,false);
- $alldata['categories'] = $categories;
- //subcategory data
-// $subcategory = getAllData("subview" , " hide_ = 0 " , null ,false);
- //$alldata['subcategory'] = $subcategory;
- //products data
- $product = getAllData("product" , " hide = 0 " , null ,false ,   'ORDER BY RAND() LIMIT 10'  );
- $alldata['product'] = $product;
- 
+ $response = $categories;    
+}else if($st==2){
 
- //$items = getAllData("itemview" , null , null ,false);
- //$alldata['product'] = $items;
+//subcategory data
+    $response['success'] = true ; 
+ $subcategory = getAllData("subcategory" , " hide_ = 0 " , null ,false);
+ $response['data'] = $subcategory;
 
- echo json_encode($alldata);
+}
+else if($st==3){
+
+//subcategory data
+    $response['success'] = true ; 
+ $products = getAllData("itemview" , " hide = 0 " , null ,false ,     );
+ $response = $products;
+
+}
+
+ echo json_encode($response);
 
 
 
 
 
 
-?>   
+?>    

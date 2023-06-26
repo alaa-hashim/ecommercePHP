@@ -1,39 +1,34 @@
 <?php
-// Establish a connection to the MySQL database
-$mysqli = new mysqli('localhost' , 'root', '', 'ecommerce');
+include "connect.php" ;
+$st=$_REQUEST['st'];
 
-// Check for any connection errors
-if ($mysqli->connect_errno) {
-    echo "Failed to connect to MySQL: " . $mysqli->connect_error;
-    exit();
+$response = array();
+if($st==1){
+$response['success'] = true ; 
+ $categories = getAllData("categories" , " hide = 0 " , null ,false);
+ $response['data'] = $categories;    
+}else if($st==2){
+
+//subcategory data
+    $response['success'] = true ; 
+ $subcategory = getAllData("subcategory" , " hide_ = 0 " , null ,false);
+ $response['data'] = $subcategory;
+
+}
+else if($st==3){
+
+//subcategory data
+    $response['success'] = true ; 
+ $products = getAllData("itemview" , " hide = 0 " , null ,false ,     );
+ $response['data'] = $products;
+
 }
 
-// Check if a category parameter is provided in the API request
-$category = isset($_['id']) ? $_POST['id'] : '';
+ echo json_encode($response);
 
-// Prepare a SQL statement to select items from the specified category
-$stmt = $mysqli->prepare("SELECT * FROM productview WHERE subcat_id = ?");
-$stmt->bind_param("s", $category);
-$stmt->execute();
 
-// Fetch the result set
-$result = $stmt->get_result();
 
-// Create an array to store the items
-$data = array();
 
-// Loop through the result set and add each item to the array
-while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
-}
 
-if ($result->num_rows > 0) {
-    echo json_encode(array("status" => "success", "data" => $data));
-} else {
-    echo json_encode(array("status" => "error"));
-}
 
-// Close the database connection
-$stmt->close();
-$mysqli->close();
-?>
+?>    
