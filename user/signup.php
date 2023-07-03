@@ -2,7 +2,7 @@
 
 include "../connect.php";
 
-$username = filterRequest("username");
+$username = $_POST['user'];
 $password = sha1($_POST['password']);
 $email = filterRequest("email");
 $phone = filterRequest("phone");
@@ -16,7 +16,7 @@ if ($count > 0) {
 } else {
 
     $data = array(
-        "username" => $username,
+        "user" => $username,
         "password" =>  $password,
         "email" => $email,
         "phone" => $phone,
