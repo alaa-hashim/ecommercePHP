@@ -14,11 +14,14 @@ if ($mysqli->connect_errno) {
 
 
     // Prepare a SQL statement to select items from the specified category
-    
+    if(isset($_POST['firstDate']) || isset($_POST['lastDate'])){
+        $firstDate = $_POST['firstDate'];
+        $listDate = $_POST['lastDate'];
+
    
         $stmt = $mysqli->prepare("SELECT *, (SELECT SUM(payment) FROM orderview WHERE oder_date BETWEEN '2023-05-01' AND '2023-07-01') AS total
         FROM orderview
-        WHERE oder_date BETWEEN '2023-05-01' AND '2023-07-01'
+        WHERE oder_date BETWEEN 'firstDate' AND 'lastDate'
         GROUP BY order_id;
         ");
         
@@ -47,7 +50,8 @@ if ($mysqli->connect_errno) {
 // Close the database connection
 $stmt->close();
 $mysqli->close();
+    }
 ?>
 
 
-  
+   
