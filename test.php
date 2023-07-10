@@ -1,7 +1,25 @@
-<?php
+<?php 
+include"connect.php";
+$name = filterRequest("name");
+$namear = filterRequest("namear");
+$oldimage = filterRequest("oldimage");
+ $res =  imageUpload("../../images/category" , "files");
+ if($res == "empty"){
+    $data =array(
+        "category_name" => $name ,
+        "category_namear" => $namear ,
+        
+    );
 
-include "connect.php";
- 
+ } else{
+$oldimage = filterRequest("oldimage");
+    deleteFile("../../images/category" , $oldimage);
+    $data =array(
+        "category_name" => $name ,
+        "category_namear" => $namear ,
+        "img" => $res,
+    );
+ }
 
-getAllData("images");
+updateData($table,$data , "category_id = $id");
 ?>

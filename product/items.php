@@ -12,7 +12,7 @@ if ($mysqli->connect_errno) {
 $category = isset($_POST['id']) ? $_POST['id'] : '';
 
 // Prepare a SQL statement to select items from the specified category
-$stmt = $mysqli->prepare("SELECT * FROM productview WHERE subcat_id = ?");
+$stmt = $mysqli->prepare("SELECT * FROM itemview WHERE subcat_id = ?");
 $stmt->bind_param("s", $category);
 $stmt->execute();
 
