@@ -77,8 +77,12 @@ else {
 
     
 }
+// authentication end 
 
-else if($st==5){
+
+// cart 
+// 6 == cart view 
+else if($st==6){
     $userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
 
 // Assuming filterRequest() is a function that sanitizes input
@@ -96,12 +100,68 @@ $datacountprice = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $response = array(
     "status" => "success",
-    "countprice" =>  $datacountprice,
     "datacart" => $data,
+    "countprice" =>  $datacountprice,
+    
+   
+    
 );
     
+} // 7 == add to cart
+else if($st ==7){
+    $userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
+$itemid = isset($_REQUEST["itemid"]) ? $_REQUEST["itemid"] : null;
+
+if ($userid && $itemid) {
+    $data = array(
+        "cart_userid" => $userid,
+        "cart_itemid" => $itemid
+    );
+    
+    insertData("cart", $data);
+} else {
+    echo "User ID and item ID are required.";
 }
-else if($st==6){
+
+}
+// 8 == delete from cart
+else if ($st== 8){
+    $userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
+$itemid = isset($_REQUEST["itemid"]) ? $_REQUEST["itemid"] : null;
+
+if ($userid && $itemid) {
+    $where = "cart_userid = $userid AND cart_itemid = $itemid";
+    
+    deleteData("cart", $where);
+    echo json_encode(array("status" => "success"));
+} else {
+    echo json_encode(array("status" => "failure"));
+}
+}
+// 9 == get count from cart 
+else if($st== 9){
+    $userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
+$itemid = isset($_REQUEST["itemid"]) ? $_REQUEST["itemid"] : null;
+
+if ($userid && $itemid) {
+    $stmt = $con->prepare("SELECT COUNT(cart_id) AS countitems FROM cart WHERE cart_userid = :userid AND cart_itemid = :itemid");
+    $stmt->bindParam(':userid', $userid);
+    $stmt->bindParam(':itemid', $itemid);
+    $stmt->execute();
+
+    $count = $stmt->rowCount();
+
+    if ($count > 0) {
+        $data = $stmt->fetchColumn();
+        echo json_encode(array("status" => "success", "data" => $data));
+    } else {
+        echo json_encode(array("status" => "success", "data" => "0"));
+    }
+} else {
+    echo json_encode(array("status" => "failure", "data" => "Missing userid or itemid"));
+}
+}
+else if($st==30){
     $userid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
 
 $stmt = $con->prepare("SELECT * FROM `product` WHERE `product_id` != :id ORDER BY RAND()  LIMIT 6");
