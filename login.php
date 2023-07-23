@@ -27,7 +27,7 @@ require_once('function2.php');
 <body>
     <div class="home-btn d-none d-sm-block">
         <a href="index.html" class="text-reset"><i class="fas fa-home h2"></i></a>
-    </div>
+    </div> 
 
 <?php
 

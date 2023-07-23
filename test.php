@@ -1,22 +1,30 @@
 <?php
 
-include "connect.php";
+include "/connect.php";
 
-$userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
 
-$data = getAllData("cartview", "cart_userid = :userid", array(':userid' => $userid), false);
+$categoryid = filterRequest("id");
 
-$stmt = $con->prepare("SELECT SUM(itemsprice) as totalprice, COUNT(countitems) as totalcount FROM `cartview` WHERE cart_userid = :userid GROUP BY cart_userid");
+// getAllData("itemsview", "categories_id = $categoryid");
 
-$stmt->bindValue(':userid', $userid);
+$userid = filterRequest("usersid");
+
+
+
+$stmt = $con->prepare("SELECT itemviews.* , 1 as wish FROM itemviews 
+INNER JOIN favorite ON favorite.favorite_itemsid = itemviews.items_id AND favorite.favorite_usersid = $userid
+WHERE categories_id = $categoryid
+UNION ALL 
+SELECT *  , 0 as wish  FROM itemviews
+WHERE  categories_id = $categoryid AND items_id NOT IN  ( SELECT itemviews.items_id FROM itemviews 
+INNER JOIN favorite ON favorite.favorite_itemsid = itemviews.items_id AND favorite.favorite_usersid =  $userid  )");
+
 $stmt->execute();
+$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$count  = $stmt->rowCount();
 
-$datacountprice = $stmt->fetch(PDO::FETCH_ASSOC);
-
-$response = array(
-    "status" => "success",
-    "countprice" => $datacountprice,
-    "datacart" => $data
-);
-
-echo json_encode($response);
+if ($count > 0) {
+    echo json_encode(array("status" => "success", "data" => $data));
+} else {
+    echo json_encode(array("status" => "failure"));
+}

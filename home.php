@@ -18,9 +18,42 @@ $response['success'] = true ;
 else if($st==3){
 
 //subcategory data
-    $response['success'] = true ; 
+   $response['success'] = true ; 
  $products = getAllData("itemview" , " hide = 0 " , null ,false ,     );
  $response = $products;
+
+ /*$categoryid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+$userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
+
+// Assuming $con is your PDO database connection object
+$stmt = $con->prepare("
+    SELECT itemview.*, 1 as wishlist FROM itemview
+    INNER JOIN wishlist ON wishlist.wishlist_productid = itemview.product_id AND wishlist.wishlist_userid = :userid
+    WHERE subcat_id = :categoryid
+    UNION ALL 
+    SELECT *, 0 as wishlist FROM itemview
+    WHERE subcat_id = :categoryid AND product_id NOT IN (
+        SELECT itemview.product_id FROM itemview
+        INNER JOIN wishlist ON wishlist.wishlist_productid = itemview.product_id AND wishlist.wishlist_userid = :userid
+    )"
+);
+
+// Assuming $userid is the user ID you want to use in the query
+$stmt->bindParam(':userid', $userid, PDO::PARAM_INT);
+
+// Bind $categoryid parameter to the prepared statement
+$stmt->bindParam(':categoryid', $categoryid, PDO::PARAM_INT);
+
+$stmt->execute();
+$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$count  = $stmt->rowCount();
+
+if ($count > 0) {
+    echo json_encode(array("status" => "success", "data" => $data));
+} else {
+    echo json_encode(array("status" => "failure"));
+} */
+
 
 }
 // authentication 
@@ -85,27 +118,25 @@ else {
 else if($st==6){
     $userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
 
-// Assuming filterRequest() is a function that sanitizes input
-
-$data = getAllData("cartview", "cart_userid = $userid", null, false);
-
-$stmt = $con->prepare("SELECT SUM(itemsprice) as totalprice, count(countitems) as totalcount FROM `cartview`  
-WHERE  cart_userid = :userid
-GROUP BY cart_userid");
-
-$stmt->bindParam(':userid', $userid, PDO::PARAM_INT);
-$stmt->execute();
-
-$datacountprice = $stmt->fetch(PDO::FETCH_ASSOC);
-
-$response = array(
-    "status" => "success",
-    "datacart" => $data,
-    "countprice" =>  $datacountprice,
+    // Assuming filterRequest() is a function that sanitizes input
     
+    $data = getAllData("cartview", "cart_userid = $userid", null, false);
+    
+    $stmt = $con->prepare("SELECT SUM(itemsprice) as totalprice, count(countitems) as totalcount FROM `cartview`  
+    WHERE  cart_userid = :userid
+    GROUP BY cart_userid");
+    
+    $stmt->bindParam(':userid', $userid, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $datacountprice = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $response =array(
+        "status" => "success",
+        "countprice" =>  $datacountprice,
+        "datacart" => $data,
+    );
    
-    
-);
     
 } // 7 == add to cart
 else if($st ==7){
@@ -161,19 +192,76 @@ if ($userid && $itemid) {
     echo json_encode(array("status" => "failure", "data" => "Missing userid or itemid"));
 }
 }
-else if($st==30){
-    $userid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+// wishlist starts
+// wishlist view
+else if($st==10){
+    $categoryid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+$userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
 
-$stmt = $con->prepare("SELECT * FROM `product` WHERE `product_id` != :id ORDER BY RAND()  LIMIT 6");
-$stmt->bindParam(':id', $userid, PDO::PARAM_INT);
-$stmt->execute();
-
-$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$response = array(
-    "status" => "success",
-    "recommend" => $data,
+// Assuming $con is your PDO database connection object
+$stmt = $con->prepare("
+    SELECT itemviews.*, 1 as wishlist FROM itemviews
+    INNER JOIN wishlist ON wishlist.wishlist_productid = itemviews.product_id AND wishlist.wishlist_userid = :userid
+    WHERE subcat_id = :categoryid
+    UNION ALL 
+    SELECT *, 0 as wishlist FROM itemviews
+    WHERE subcat_id = :categoryid AND product_id NOT IN (
+        SELECT itemviews.product_id FROM itemviews
+        INNER JOIN wishlist ON wishlist.wishlist_productid = itemviews.product_id AND wishlist.wishlist_userid = :userid
+    )"
 );
+
+// Assuming $userid is the user ID you want to use in the query
+$stmt->bindParam(':userid', $userid, PDO::PARAM_INT);
+
+// Bind $categoryid parameter to the prepared statement
+$stmt->bindParam(':categoryid', $categoryid, PDO::PARAM_INT);
+
+$stmt->execute();
+$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$count  = $stmt->rowCount();
+
+if ($count > 0) {
+    $response = array("status" => "success", "data" => $data);
+} else {
+    $response =array("status" => "failure");
+}
+}
+// wishlist add
+else if($st== 11){
+
+    $itemid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+   $userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
+
+$data = array("wishlist_userid" => $userid,
+ "wishlist_productid" => $itemid);
+  insertData("wishlist", $data , );
+}
+// wishlist remove
+else if($st ==12){
+    $itemid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+$userid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
+
+$response = deleteData("wishlist", "wishlist_userid = $userid AND wishlist_productid = $itemid");
+
+}
+// wishlit ends 
+else if($st==30){
+    $productid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+    $subid = isset($_REQUEST["subid"]) ? $_REQUEST["subid"] : null;
+    
+    $stmt = $con->prepare("SELECT * FROM `product` WHERE `product_id` != :id AND `subcat_id` = :subid ORDER BY RAND() LIMIT 6");
+    $stmt->bindParam(':id', $productid, PDO::PARAM_INT);
+    $stmt->bindParam(':subid', $subid, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $response = array(
+        "status" => "success",
+        "recommend" => $data,
+    );
+    
 
     
     
