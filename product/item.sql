@@ -11,11 +11,11 @@ $userid = filterRequest("usersid");
 
 
 
-$stmt = $con->prepare("SELECT productview.* , 1 as wishlist FROM productview 
+$stmt = $con->prepare("SELECT productview.* , 1 as wishlist , (price - (price * product_discount / 100)) as itemdiscount FROM productview 
 INNER JOIN wishlist ON wishlist.wishlist_productid = productview.product_id AND wishlist.wishlist_userid = $userid
 WHERE subcat_id = $categoryid
 UNION ALL 
-SELECT *  , 0 as wishlist  FROM productview
+SELECT *  , 0 as wishlist , (price - (price * product_discount / 100)) as itemdiscount  FROM productview
 WHERE  subcat_id = $categoryid AND product_id NOT IN  ( SELECT productview.product_id FROM productview 
 INNER JOIN wishlist ON wishlist.wishlist_productid = productview.product_id AND wishlist.wishlist_userid =  $userid  )");
 
