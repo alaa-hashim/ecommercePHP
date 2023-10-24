@@ -1,10 +1,6 @@
 <?php
 
-// ==========================================================
-//  Copyright Reserved Wael Wael Abo Hamza (Course Ecommerce)
-// ==========================================================
 
-// date_default_timezone_set("Asia/Damascus");
 
 define("MB", 1048576);
 
@@ -89,6 +85,7 @@ function insertData($table, $data, $json = true)
 }
 
 
+
 function updateData($table, $data, $where, $json = true)
 {
     global $con;
@@ -113,6 +110,8 @@ function updateData($table, $data, $where, $json = true)
     }
     return $count;
 }
+
+
 
 function deleteData($table, $where, $json = true)
 {
@@ -241,7 +240,7 @@ function sendGCM($title, $message, $topic, $pageid, $pagename)
 
     $fields = json_encode($fields);
     $headers = array(
-        'Authorization: key=' . "",
+        'Authorization: key=' . "AAAA8u8r0_M:APA91bEfQ3uJ3C0QncOlv0OfCsru-jGmXEaItqUiQMTLWFmZ2fLJfE62An1DY8Tjw_U_l9myfAZVD8NIEs59xfCEy_t3VoZRHrTCFZI7Mdvo4l6q6KpaGwnjLMgDupp40WiWd9TIaDZ4",
         'Content-Type: application/json'
     );
 
@@ -262,7 +261,7 @@ function sendGCM($title, $message, $topic, $pageid, $pagename)
 function insertNotify($title, $body, $userid, $topic, $pageid, $pagename)
 {
     global $con;
-    $stmt  = $con->prepare("INSERT INTO `notification`(  `notification_title`, `notification_body`, `notification_userid`) VALUES (? , ? , ?)");
+    $stmt  = $con->prepare("INSERT INTO `notifications`(  `notification_title`, `detail`, `notification_userid`) VALUES (? , ? , ?)");
     $stmt->execute(array($title, $body, $userid));
     sendGCM($title,  $body, $topic, $pageid, $pagename);
     $count = $stmt->rowCount();
