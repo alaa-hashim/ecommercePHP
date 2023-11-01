@@ -23,6 +23,88 @@ $st=$_REQUEST['st'];
     insertData("cart", $data ,);
      
 }
+else if ($st==999){
+    $table = "images";
+$name =isset($_REQUEST["name"]) ? $_REQUEST["name"] : null;
+$itemid =isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+
+
+$data =array(
+    "image_name" => $name ,
+        "item_id" => $itemid ,
+       
+       
+);
+insertData($table,$data);
+
+}
+else if($st==5){
+    $email = isset($_REQUEST["email"]) ? $_REQUEST["email"] : null;
+   $password = isset($_REQUEST["password"]) ? $_REQUEST["password"] : null;
+   $username = isset($_REQUEST["user"]) ? $_REQUEST["user"] : null;
+   $phone = isset($_REQUEST["phone"]) ? $_REQUEST["phone"] : null;
+   $token = isset($_REQUEST["token"]) ? $_REQUEST["token"] : null;
+   $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+   
+   $stmt = $con->prepare("SELECT * FROM user WHERE email = ?");
+   $stmt->bindParam(1, $email, PDO::PARAM_STR);
+   $stmt->execute();
+   
+   $count = $stmt->rowCount();
+   if ($count > 0) {
+       printFailure("EMAIL ALREADY EXISTS");
+   } else {
+       $data = array(
+           "user" => $username,
+           "password" => $hashedPassword, // Store the hashed password in the database
+           "email" => $email,
+           "phone" => $phone,
+           "token" => $token,
+       );
+       insertData("user", $data);
+   }
+   
+   
+       
+   } 
+
+elseif($st==100){
+
+   
+    $table = "address";
+    $usersid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
+    $name = isset($_REQUEST["name"]) ? $_REQUEST["name"] : null;
+    $city = isset($_REQUEST["city"]) ? $_REQUEST["city"] : null;
+    $street = isset($_REQUEST["street"]) ? $_REQUEST["street"] : null;
+    $building = isset($_REQUEST["building"]) ? $_REQUEST["building"] : null;
+    $apartment = isset($_REQUEST["apartment"]) ? $_REQUEST["apartment"] : null;
+    $phone = isset($_REQUEST["phone"]) ? $_REQUEST["phone"] : null;
+    $lag = isset($_REQUEST["lag"]) ? $_REQUEST["lag"] : null;
+    $lat = isset($_REQUEST["lat"]) ? $_REQUEST["lat"] : null;
+    $type = isset($_REQUEST["type"]) ? $_REQUEST["type"] : null;
+    $image = isset($_REQUEST["image"]) ? $_REQUEST["image"] : null;
+    
+    
+    
+    $data = array(  
+    
+    "user_address" => $usersid,
+    "address_name"   => $name,
+    "city" => $city,
+    "street" => $street,
+    "building" => $building,
+    "apartment" => $apartment,
+    "address_phone"   => $phone,
+    "address_long" => $lag,
+    "address_lat" => $lat,
+    "address_type" => $type,
+    "address_image" => $image,
+    
+    );
+    
+    insertData($table , $data);
+    
+} 
 //order start 
 else if($st==30){
         
@@ -280,15 +362,113 @@ $data = array(
        // updateData1("viewers" , " view_count = view_count + 1 " , " item_id = $itemid " , );
        }else {
         insertData("viewers" , $data , " " , );
-       }
-
-              
-            
-            }
-            elseif($st == 54){
-                $id = isset($_REQUEST["id"]) ? $_REQUEST["id"]: null ;
-             getAllData("views" , "user_id = $id " );
-               }         
+       }   }
+       elseif($st== 54){
+        $id = isset($_REQUEST["id"]) ? $_REQUEST["id"]: null ;
+     getAllData("views" , "user_id = $id " );
+       }  
+       elseif($st== 55){
+        $id = isset($_REQUEST["id"]) ? $_REQUEST["id"]: null ;
+     getAllData("ordersview" , "order_userid = $id " );
+       }  
+       elseif($st== 56){
+        $id = isset($_REQUEST["id"]) ? $_REQUEST["id"]: null ;
+     getAllData("ordersdetailsview" , "cart_userid = $id " );
+       }  
+       else if ($st == 57) {
+        $id = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+        $currentDateTime = date('Y-m-d H:i:s'); // Get the current date and time in yyyy-mm-dd HH:mm:ss format
+        $twoYearsAgo = date('Y-m-d H:i:s', strtotime('-4 day', strtotime($currentDateTime))); // Calculate the date two years ago
+    
+        $data = array();
+        $stmt = $con->prepare("SELECT * FROM ordersview WHERE order_userid = ? AND oder_date BETWEEN ? AND ? GROUP BY order_id");
+        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt->bindParam(2, $twoYearsAgo, PDO::PARAM_STR);
+        $stmt->bindParam(3, $currentDateTime, PDO::PARAM_STR);
+    
+        $stmt->execute();
+    
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $count = $stmt->rowCount();
+    
+        if ($count > 0) {
+            echo json_encode(array("status" => "success", "data" => $data));
+        } else {
+            echo json_encode(array("status" => "error"));
+        }
+    }
+    else if ($st == 58) {
+        $id = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+        $currentDateTime = date('Y-m-d H:i:s'); // Get the current date and time in yyyy-mm-dd HH:mm:ss format
+        $twoYearsAgo = date('Y-m-d H:i:s', strtotime('-3 month', strtotime($currentDateTime))); // Calculate the date two years ago
+    
+        $data = array();
+        $stmt = $con->prepare("SELECT * FROM ordersview WHERE order_userid = ? AND oder_date BETWEEN ? AND ? GROUP BY order_id");
+        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt->bindParam(2, $twoYearsAgo, PDO::PARAM_STR);
+        $stmt->bindParam(3, $currentDateTime, PDO::PARAM_STR);
+    
+        $stmt->execute();
+    
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $count = $stmt->rowCount();
+    
+        if ($count > 0) {
+            echo json_encode(array("status" => "success", "data" => $data));
+        } else {
+            echo json_encode(array("status" => "error"));
+        }
+    }
+    else if ($st == 59) {
+        $id = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+        $currentDateTime = date('Y-m-d H:i:s'); // Get the current date and time in yyyy-mm-dd HH:mm:ss format
+        $twoYearsAgo = date('Y-m-d H:i:s', strtotime('-6 month', strtotime($currentDateTime))); // Calculate the date two years ago
+    
+        $data = array();
+        $stmt = $con->prepare("SELECT * FROM ordersview WHERE order_userid = ? AND oder_date BETWEEN ? AND ? GROUP BY order_id");
+        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt->bindParam(2, $twoYearsAgo, PDO::PARAM_STR);
+        $stmt->bindParam(3, $currentDateTime, PDO::PARAM_STR);
+    
+        $stmt->execute();
+    
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $count = $stmt->rowCount();
+    
+        if ($count > 0) {
+            echo json_encode(array("status" => "success", "data" => $data));
+        } else {
+            echo json_encode(array("status" => "error"));
+        }
+    }
+    else if ($st == 60) {
+        $id = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+        $currentDateTime = date('Y-m-d H:i:s'); // Get the current date and time in yyyy-mm-dd HH:mm:ss format
+        $twoYearsAgo = date('Y-m-d H:i:s', strtotime('-2 years', strtotime($currentDateTime))); // Calculate the date two years ago
+    
+        $data = array();
+        $stmt = $con->prepare("SELECT * FROM ordersview WHERE order_userid = ? AND oder_date BETWEEN ? AND ? GROUP BY order_id");
+        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt->bindParam(2, $twoYearsAgo, PDO::PARAM_STR);
+        $stmt->bindParam(3, $currentDateTime, PDO::PARAM_STR);
+    
+        $stmt->execute();
+    
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $count = $stmt->rowCount();
+    
+        if ($count > 0) {
+            echo json_encode(array("status" => "success", "data" => $data));
+        } else {
+            echo json_encode(array("status" => "error"));
+        }
+    }
+    
+    
+    
+    
+         
+                   
 else if($st==19){
        
 
@@ -344,6 +524,13 @@ else if($st==19){
         updateData("cart", $data, "cart_userid = $usersid  AND cart_order = 0 ");
     }
 }
+else if($st==330){
+    $productid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
+    $subid = isset($_REQUEST["subid"]) ? $_REQUEST["subid"] : null;
+    
+    getAllData("itemviews" , "product_id != $productid  AND subcat_id =  $subid " , null , true);
+
+}
 else if($st== 17){
 
     
@@ -379,12 +566,22 @@ $response = deleteData("wishlist", "wishlist_userid = $userid AND wishlist_produ
 else if($st==4){
     
     $email = isset($_REQUEST["email"]) ? $_REQUEST["email"] : null;
-$password = isset($_REQUEST["password"]) ? $_REQUEST["password"] : null;
-$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $password = isset($_REQUEST["password"]) ? $_REQUEST["password"] : null;
 
-getData("user" , "email = ? AND  password = ?" , array($email , $password)) ; 
+    // Assuming your function getData works properly
+    $result = getData("user", "email = :email AND user_hide = 0", array(":email" => $email));
 
+    if ($result) {
+        $hashedPasswordInDatabase = $result[0]['password'];
 
+        if (password_verify($password, $hashedPasswordInDatabase)) {
+            // Password is correct
+            echo json_encode(array("status" => "success", "data" => $result));
+        } else {
+            // Password is incorrect
+            echo json_encode(array("status" => "error", "message" => "Invalid password"));
+        }
+    } 
     
 }
 else if($st==90){
@@ -428,7 +625,12 @@ elseif ($st==2){
       getAllData("subcategory" , " hide_ = 0 AND $id = cat_id " , );
     
     }
-  
+  elseif ($st==222){
+    $id = isset($_REQUEST["id"]) ? $_REQUEST["id"] : 1;
+    //subcategory data
+      getAllData("images" , " image_hide = 0 AND $id = item_id " , );
+    
+    }
    
     // update quantity -- 
   
@@ -741,43 +943,7 @@ if ($userid && $itemid) {
             "datacart" => $data,
         ));
     }
-    else if($st==200){
-
-   
-        $table = "address";
-        $usersid = isset($_REQUEST["userid"]) ? $_REQUEST["userid"] : null;
-        $name = isset($_REQUEST["name"]) ? $_REQUEST["name"] : null;
-        $city = isset($_REQUEST["city"]) ? $_REQUEST["city"] : null;
-        $street = isset($_REQUEST["street"]) ? $_REQUEST["street"] : null;
-        $building = isset($_REQUEST["building"]) ? $_REQUEST["building"] : null;
-        $apartment = isset($_REQUEST["apartment"]) ? $_REQUEST["apartment"] : null;
-        $phone = isset($_REQUEST["phone"]) ? $_REQUEST["phone"] : null;
-        $lag = isset($_REQUEST["lag"]) ? $_REQUEST["lag"] : null;
-        $lat = isset($_REQUEST["lat"]) ? $_REQUEST["lat"] : null;
-        $type = isset($_REQUEST["type"]) ? $_REQUEST["type"] : null;
-        $image = isset($_REQUEST["image"]) ? $_REQUEST["image"] : null;
-        
-        
-        
-        $data = array(  
-        
-        "user_address" => $usersid,
-        "address_name"   => $name,
-        "city" => $city,
-        "street" => $street,
-        "building" => $building,
-        "apartment" => $apartment,
-        "address_phone"   => $phone,
-        "address_long" => $lag,
-        "address_lat" => $lat,
-        "address_type" => $type,
-        "address_image" => $image,
-        
-        );
-        
-        insertData($table , $data);
-        
-}    
+  
 
 
 elseif($st ==500){
@@ -801,7 +967,7 @@ else if($st =55){
     
     insertData("cart", $data);
 }
-
+   
    
 
 ?>   

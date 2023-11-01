@@ -449,7 +449,7 @@ else if($st==30){
     $productid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
     $subid = isset($_REQUEST["subid"]) ? $_REQUEST["subid"] : null;
     
-    $stmt = $con->prepare("SELECT * FROM `product` WHERE `product_id` != :id AND `subcat_id` = :subid ORDER BY RAND() LIMIT 6");
+    $stmt = $con->prepare("SELECT * FROM `itemviews` WHERE `product_id` != :id AND `subcat_id` = :subid ORDER BY RAND() LIMIT 6");
     $stmt->bindParam(':id', $productid, PDO::PARAM_INT);
     $stmt->bindParam(':subid', $subid, PDO::PARAM_INT);
     $stmt->execute();
